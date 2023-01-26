@@ -7,6 +7,7 @@ Universidad Austral
 Instalación
 ```bash
 git clone https://github.com/Oscar-gg/sample-project.git
+cd sample-project
 cd red-bicicletas
 npm install
 ```
