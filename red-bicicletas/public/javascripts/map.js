@@ -13,3 +13,14 @@ var circle = L.circle([51.508, -0.11], {
     fillOpacity: 0.5,
     radius: 500
 }).addTo(map);
+
+fetch("api/bicicletas")
+    .then((response) => response.json())
+    .then((json) => {
+        console.log(json.bicicletas);
+        for (let bici of json.bicicletas) {
+            console.log(bici.ubicacion);
+            L.marker(bici.ubicacion, {title: bici.id}).addTo(map);
+        }
+    }
+    );

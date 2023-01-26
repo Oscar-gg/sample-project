@@ -35,7 +35,7 @@ Bicicleta.prototype.add = function(){
     Bicicleta.allBicis.push(this);
 }
 
-var a = new Bicicleta(1, "rojo", "supreme", [51.509, -0.14]);
+var a = new Bicicleta(1, "rojo", "supreme", [51.508, -0.11]);
 var b = new Bicicleta(2, "azul", "aventura", [51.495, -0.149]);
 
 a.add();
