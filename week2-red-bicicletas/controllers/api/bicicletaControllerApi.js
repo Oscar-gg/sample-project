@@ -1,8 +1,11 @@
 var Bicicleta = require("../../models/bicicleta");
+const { bicicleta_list } = require("../bicicleta");
 
 exports.bicicleta_list = function(req, res){
-    res.status(200).json({
-        bicicletas: Bicicleta.allBicis
+    Bicicleta.find({}, function(err, bicicletas){
+        res.status(200).json({
+            bicicletas: bicicletas
+        });
     });
 }
 
