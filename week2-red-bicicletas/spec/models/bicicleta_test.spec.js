@@ -2,27 +2,24 @@ var mongoose = require('mongoose');
 var Bicicleta = require("../../models/bicicleta");
 
 describe("Testing Bicicletas", function () {
-    beforeAll(function (done) {
+    beforeAll(async function () {
         var mongoDB = "mongodb://127.0.0.1/test";
-        mongoose.connect(mongoDB, { useNewUrlParser: true });
+        await mongoose.connect(mongoDB).catch(function (err) {
+            if (err) {
+                mongoose.connection.useDb('test');
+            }
+        });
 
         const db = mongoose.connection;
         db.on('error', console.error.bind(console, 'connection error'));
         db.once('open', function () {
             console.log("We are connected to test database.");
-            done();
         });
     });
-    
-    afterAll(function(done){
-        mongoose.connection.close();
-        done();
-    })
 
-    afterEach(function (done) {
-        Bicicleta.deleteMany({}, function (err, success) {
-            if (err) console.log(err);
-            done();
+    afterEach(async function () {
+        await Bicicleta.deleteMany({}).then((out) => {
+            // console.log(out);
         });
     });
 
@@ -38,53 +35,51 @@ describe("Testing Bicicletas", function () {
     });
 
     describe('Bicicleta.allBicis', () => {
-        it("comienza vacía", (done) => {
-            Bicicleta.allBicis(function (err, bicis) {
+        it("comienza vacía", () => {
+            Bicicleta.allBicis().then(bicis => {
                 expect(bicis.length).toBe(0);
-                done();
             });
 
         });
     });
 
     describe('Bicicleta.add', () => {
-        it("agregar una bici", (done) => {
+        it("agregar una bici", () => {
             var bici = Bicicleta.createInstance(1, "rojo", "supreme", [51.508, -0.11]);
-            Bicicleta.add(bici, function (err, newBici) {
-                if (err) console.log(err);
-                Bicicleta.allBicis(function (err, bicis) {
-                    expect(bicis.length).toEqual(1);
-                    expect(bicis[0].code).toEqual(bici.code);
-
-                    done();
-                });
+            return Bicicleta.add(bici).then(() => Bicicleta.allBicis()).then(bicis => {
+                expect(bicis.length).toEqual(1);
+                expect(bicis[0].code).toEqual(bici.code);
             });
         });
     });
 
     describe('Bicicleta.findByCode', () => {
-        it("debe devolver bici con code 1", (done) => {
-            var bici = Bicicleta.createInstance(1, "rojo", "supreme", [51.508, -0.11]);
+        it("debe devolver bici con code 1", async () => {
+            var bicis = await Bicicleta.allBicis();
+            expect(bicis.length).toBe(0);
 
-            Bicicleta.add(bici, function (err, newBici) {
-                if (err) console.log(err);
-                var bici2 = Bicicleta.createInstance(1, "rojo", "supreme", [51.508, -0.11]);
-                Bicicleta.add(bici2, function (err, newBici) {
-                    Bicicleta.allBicis(async function (err, bicis) {
-                        const bicilist = await Bicicleta.find();
-                        console.log(bicilist);
-                        expect(bicis.length).toEqual(2);
-                        Bicicleta.findByCode(bici.code, function (err, biciTest) {
-                            expect(biciTest.code).toBe(1);
-                            expect(biciTest.color).toBe("rojo");
-                            expect(biciTest.modelo).toBe("supreme");
-                            expect(biciTest.ubicacion[0]).toEqual(51.508);
-                            expect(biciTest.ubicacion[1]).toEqual(-0.11);
-                            done();
-                        });
-                    });
-                });
-            });
+            var bici = Bicicleta.createInstance(1, "rojo", "supreme", [51.508, -0.11]);
+            await Bicicleta.add(bici);
+            var bici2 = Bicicleta.createInstance(2, "Azul", "Aventuras", [51.519, -0.114]);
+            await Bicicleta.add(bici2);
+
+            bicis = await Bicicleta.allBicis();
+            expect(bicis.length).toBe(2);
+
+            var resBici = await Bicicleta.findByCode(1);
+            expect(resBici.code).toBe(1);
+            expect(resBici.color).toBe("rojo");
+            expect(resBici.modelo).toBe("supreme");
+            expect(resBici.ubicacion[0]).toEqual(51.508);
+            expect(resBici.ubicacion[1]).toEqual(-0.11);
+
+            resBici = await Bicicleta.findByCode(2);
+
+            expect(resBici.code).toBe(2);
+            expect(resBici.color).toBe("Azul");
+            expect(resBici.modelo).toBe("Aventuras");
+            expect(resBici.ubicacion[0]).toEqual(51.519);
+            expect(resBici.ubicacion[1]).toEqual(-0.114);
         });
     });
 });

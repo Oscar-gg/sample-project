@@ -9,9 +9,9 @@ block content
   h1 Actualizando Bicicleta 
   br
 
-  form#formulario(action=`/bicicletas/${bici.id}/update` method='post')
+  form#formulario(action=`/bicicletas/${bici.code}/update` method='post')
     label(for='id') ID:
-    input.form-in(type='text' name='id' value=bici.id)
+    input.form-in(type='text' name='code' value=bici.code)
     br
     label(for='color') Color:
     input.form-in(type='text' name='color' value=bici.color)

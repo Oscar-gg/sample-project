@@ -14,7 +14,7 @@ var app = express();
 
 var mongoose = require('mongoose');
 
-var mongoDB = "mongodb://localhost/red_bicicletas";
+var mongoDB = "mongodb://127.0.0.1/red_bicicletas";
 mongoose.connect(mongoDB);
 var db = mongoose.connection;
 db.on('error', console.log.bind(console, "MongoDB connection error: "));
