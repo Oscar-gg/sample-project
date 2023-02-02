@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 var biciRouter = require('./routes/bicicletas');
 var biciApiRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
+var tokenRouter = require('./routes/token');
 
 var app = express();
 
@@ -31,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/token', tokenRouter);
+
 app.use('/bicicletas', biciRouter);
 app.use('/api/bicicletas', biciApiRouter);
 app.use('/api/usuarios', usuariosAPIRouter);

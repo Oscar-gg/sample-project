@@ -1,5 +1,7 @@
 // File to test mongoose queries using then().
 
+const mailer = require('../../mailer/mailer')
+
 function testMongoose() {
     var mongoose = require("mongoose");
     var Bicicleta = require("../../models/bicicleta");
@@ -45,4 +47,19 @@ function testEmail() {
     }
 }
 
-testEmail();
+function testSendEmail(){
+    const email_destination ='kamren63@ethereal.email';
+    const mailOptions = {
+        from: 'no-reply@redbicicletas.com',
+        to: email_destination, 
+        subject: 'Test de envio de correo',
+        text: 'Mensaje de prueba.\n End text xd'
+    };
+
+    mailer.sendMail(mailOptions, function(err){
+        if (err) {return console.log(err.message);}
+        console.log('Se ha enviado un email de prueba a ' + email_destination);
+    })
+}
+
+testSendEmail();
