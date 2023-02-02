@@ -61,8 +61,8 @@ usuarioSchema.methods.reservar = function (biciId, desde, hasta, cb) {
     reserva.save(cb);
 }
 
-usuarioSchema.methods.enviar_email_bienvenida = function(cb){
-    const token = new Token({_userid: this.id, token: crypto.randomBytes(16).toString('hex')});
+usuarioSchema.methods.enviar_email_bienvenida = function(){
+    const token = new Token({_userid: this._id, token: crypto.randomBytes(16).toString('hex')});
     const email_destination = this.email;
     token.save(function(err){
         if (err) {return console.log(err.message);}
