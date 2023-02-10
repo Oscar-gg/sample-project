@@ -4,8 +4,8 @@ const mailConfig = {
     host: 'smtp.ethereal.email',
     port: 587,
     auth: {
-        user: 'kamren63@ethereal.email',
-        pass: 'rP1Fx1mPx5GGND6V8d'
+        user: 'robert.roberts2@ethereal.email',
+        pass: 'x5sAH9rMFM8MHWMQXP'
     }
 }
 

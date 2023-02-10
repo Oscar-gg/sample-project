@@ -81,4 +81,27 @@ usuarioSchema.methods.enviar_email_bienvenida = function(){
     });
 }
 
+usuarioSchema.methods.resetPassword = function(){
+    const token = new Token({_userid: this._id, token: crypto.randomBytes(16).toString('hex')});
+    const email_destination = this.email;
+    token.save(function(err){
+        if (err) {return console.log(err.message);}
+
+        const mailOptions = {
+            from: 'no-reply@redbicicletas.com',
+            to: email_destination, 
+            subject: 'Cambio de contraseña',
+            text: 'Hola,\n\nPara cambiar su contraseña haga click aquí: \n' + 'http://localhost:3000' + '\/resetPassword\/' + token.token + '.\n\n\nSi usted no solicito un cambio de contraseña ignore este correo.'
+        };
+
+        mailer.sendMail(mailOptions, function(err){
+            if (err) {return console.log(err.message);}
+            console.log('Se ha enviado un email de bienvenida a ' + email_destination);
+        });
+
+    });
+}
+
+
+
 module.exports = mongoose.model('Usuario', usuarioSchema);

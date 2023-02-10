@@ -19,4 +19,8 @@ const tokenSchema = new Schema({
     }
 });
 
+tokenSchema.statics.deleteToken = function(_userid){
+    return this.deleteMany({_userid: _userid}).then((ans) => console.log(ans));
+}
+
 module.exports = mongoose.model('Token', tokenSchema);

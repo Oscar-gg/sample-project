@@ -9,3 +9,10 @@
 .form-in{
     margin:5px;
 }
+
+a {
+    color: #00b7ff
+}
+#main_map {
+    height: 600px;
+}
