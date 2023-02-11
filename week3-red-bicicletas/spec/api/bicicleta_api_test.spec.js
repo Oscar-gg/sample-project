@@ -2,10 +2,13 @@ var mongoose = require("mongoose");
 var Bicicleta = require("../../models/bicicleta");
 const axios = require('axios');
 var server = require("../../bin/www");
+const Usuario = require("../../models/usuario");
+
+let token = null;
 
 async function getRequest(link) {
     try {
-        const response = await axios.get(link);
+        const response = await axios.get(link, { headers: { 'content-type': 'application/json', 'x-access-token': token } });
         return response;
     } catch (error) {
         console.error(error);
@@ -15,7 +18,7 @@ async function getRequest(link) {
 async function postRequest(link, bici) {
     try {
         const response = await axios.post(link, bici,
-            { headers: { 'content-type': 'application/json' } }
+            { headers: { 'content-type': 'application/json', 'x-access-token': token } }
         );
         return response;
     } catch (error) {
@@ -25,8 +28,14 @@ async function postRequest(link, bici) {
 
 async function deleteRequest(link, id) {
     try {
-        const response = await axios.delete(link, { data: id },
-            { headers: { 'content-type': 'application/json' } }
+        const response = await axios.delete(link, {
+            headers: {
+                'content-type': 'application/json', 'x-access-token': token
+            },
+            data: {
+                id: id
+            }
+        }
         );
         return response;
     } catch (error) {
@@ -48,6 +57,19 @@ describe("Bicicleta API", () => {
         db.once('open', function () {
             console.log("We are connected to test database.");
         });
+
+        await Usuario.deleteMany({});
+
+        // Crear usuario para obtener token, autenticarse y hacer requests.
+        const usuarioTest = new Usuario({ nombre: "test", email: "test@test.com", password: "1234", verificado: true });
+        await usuarioTest.save();
+        await fetch('http://localhost:3000/api/auth/authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: "test@test.com", password: "1234" })
+        }).then((res) => res.json()).then((data) => token = data.data.token).catch((err) => console.log(err));
     });
 
     afterEach(async function () {
@@ -66,10 +88,10 @@ describe("Bicicleta API", () => {
 
     describe("POST bicicletas /", () => {
         it("STATUS 200", async function () {
-            Bicicleta.allBicis().then((bicis) => expect(bicis.length).toBe(0));
+            await Bicicleta.allBicis().then((bicis) => expect(bicis.length).toBe(0));
 
             var a = Bicicleta.createInstance(1, "rojo", "supreme", [51.508, -0.11]);
-            Bicicleta.add(a);
+            await Bicicleta.add(a);
 
             var testBici = { "id": 5, "modelo": "extremo", "color": "verde", "lat": 10, "lng": 20 };
             var link = 'http://localhost:3000/api/bicicletas/create';
@@ -102,21 +124,17 @@ describe("Bicicleta API", () => {
             await Bicicleta.add(bici4);
             await Bicicleta.allBicis().then((bicis) => expect(bicis.length).toBe(4));
 
-            var object = { "id": 1 };
             var link = 'http://localhost:3000/api/bicicletas/delete';
-            var response = await deleteRequest(link, object);
-            object.id = 2;
-            response = await deleteRequest(link, object);
+            var response = await deleteRequest(link, 1);
+            response = await deleteRequest(link, 2);
             expect(response.status).toBe(200);
 
             var responseGet = await getRequest('http://localhost:3000/api/bicicletas');
             expect(responseGet.status).toBe(200);
             expect(responseGet.data.bicicletas.length).toBe(2);
 
-            object.id = 5;
-            response = await deleteRequest(link, object);
-            object.id = 6;
-            response = await deleteRequest(link, object);
+            response = await deleteRequest(link, 5);
+            response = await deleteRequest(link, 6);
 
             responseGet = await getRequest('http://localhost:3000/api/bicicletas');
             expect(responseGet.status).toBe(200);

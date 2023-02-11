@@ -21,7 +21,7 @@ exports.bicicleta_create = function (req, res) {
 exports.bicicleta_delete = async function (req, res) {
     var bici = await Bicicleta.findByCode(req.body.id);
     await Bicicleta.removeByCode(req.body.id);
-
+    // console.log(bici);
     // Ver bicicleta borrada
     res.status(200).json({
         bicicleta: bici

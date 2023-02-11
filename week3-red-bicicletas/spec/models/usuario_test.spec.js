@@ -31,7 +31,7 @@ describe("Testing Usuarios", function () {
 
     describe('cuando un usuario reserva una bici', () => {
         it('debe existir la reserva', (done) => {
-            const usuario = new Usuario({ nombre: 'Ezequiel' });
+            const usuario = new Usuario({ nombre: 'Ezequiel' , email : 'eze@gmail.com', password: 'ggez'});
             usuario.save();
             const bicicleta = new Bicicleta({ code: 1, color: 'verde', modelo: "urbana", ubicacion: [-20, 20] });
             bicicleta.save();

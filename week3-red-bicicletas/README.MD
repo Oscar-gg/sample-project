@@ -1,4 +1,4 @@
-# red-bicicletas week 2
+# red-bicicletas week 3
 
 Proyecto parte del curso:
 Desarrollo del lado servidor: NodeJS, Express y MongoDB
@@ -7,7 +7,7 @@ Universidad Austral
 ## Instalación
 ```bash
 git clone https://github.com/Oscar-gg/sample-project.git
-cd week2-red-bicicletas
+cd week3-red-bicicletas
 npm install
 ```
 **Asegurar que Mongo esta instalado antes de correr**
@@ -29,6 +29,7 @@ npm test
 
 Endpoints para requests con Postman:
 ```
+'/api/auth/authenticate' (post)
 '/api/bicicletas/create' (post)
 '/api/bicicletas/delete' (delete)
 '/api/bicicletas/'       (get)
