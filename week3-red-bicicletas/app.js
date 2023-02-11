@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const passport = require('./config/passport');
 const session = require('express-session');
-
+const jwt = require('jsonwebtoken');
 
 var indexRouter = require('./routes/index');
 var biciRouter = require('./routes/bicicletas');
@@ -13,10 +13,14 @@ var biciApiRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
 var tokenRouter = require('./routes/token');
 var usuariosRouter = require('./routes/usuarios');
+var authAPIRouter = require('./routes/api/auth');
 
 const store = new session.MemoryStore;
 
 var app = express();
+
+app.set('secretKey', 'jwt_pwd_!!223344');
+
 app.use(session({
   cookie: { maxAge: 240 * 60 * 60 * 1000 },
   store: store,
@@ -87,35 +91,35 @@ app.post('/forgotPassword', function (req, res) {
   });
 });
 
-app.get('/resetPassword/:token', function(req, res, next){
-  Token.findOne({token: req.params.token}, function(err, token){
-    if (!token) return res.status(400).send({type: 'not-verified', msg: 'No existe este token, ha expirado, o ya fue usado'});
+app.get('/resetPassword/:token', function (req, res, next) {
+  Token.findOne({ token: req.params.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg: 'No existe este token, ha expirado, o ya fue usado' });
 
-    Usuario.findById(token._userid, function(err, usuario){
-      if (!usuario) return res.status(400).send({msg: 'No existe un usuario asociado con ese token.'});
-      res.render('session/resetPassword', {errors: {}, token: token});
+    Usuario.findById(token._userid, function (err, usuario) {
+      if (!usuario) return res.status(400).send({ msg: 'No existe un usuario asociado con ese token.' });
+      res.render('session/resetPassword', { errors: {}, token: token });
     });
   });
 });
 
-app.post('/resetPassword/', function(req, res){
-  Token.findOne({token: req.body.token}, function(err, token){
-    if (!token) return res.status(400).send({type: 'not-verified', msg: 'No existe este token, ha expirado, o ya fue usado'});
+app.post('/resetPassword/', function (req, res) {
+  Token.findOne({ token: req.body.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg: 'No existe este token, ha expirado, o ya fue usado' });
 
-    Usuario.findById(token._userid, function(err, usuario){
-      if (!usuario) return res.status(400).send({msg: 'No existe un usuario asociado con ese token.'});
-      if (req.body.password != req.body.confirm_password){
-        res.render('session/resetPassword', {errors: {confirm_password: {message: 'No coinciden los passwords'}}, token: token});
+    Usuario.findById(token._userid, function (err, usuario) {
+      if (!usuario) return res.status(400).send({ msg: 'No existe un usuario asociado con ese token.' });
+      if (req.body.password != req.body.confirm_password) {
+        res.render('session/resetPassword', { errors: { confirm_password: { message: 'No coinciden los passwords' } }, token: token });
         return;
       }
 
       usuario.password = req.body.password;
-      usuario.save(function(err){
-        if (err){
-          res.render('session/resetPassword', {errors: err.errors, token: token})
+      usuario.save(function (err) {
+        if (err) {
+          res.render('session/resetPassword', { errors: err.errors, token: token })
         } else {
           // Borrar tokens que ya no son necesarios.
-          Token.deleteToken(usuario._id);
+          Token.deleteTokens(usuario._id);
           res.redirect('/login');
         }
       });
@@ -128,7 +132,8 @@ app.use('/usuarios', usuariosRouter);
 app.use('/token', tokenRouter);
 
 app.use('/bicicletas', loggedIn, biciRouter);
-app.use('/api/bicicletas', biciApiRouter);
+app.use('/api/auth', authAPIRouter);
+app.use('/api/bicicletas', validarUsuario, biciApiRouter);
 app.use('/api/usuarios', usuariosAPIRouter);
 
 // catch 404 and forward to error handler
@@ -147,13 +152,25 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-function loggedIn(req, res, next){
-  if (req.user){
+function loggedIn(req, res, next) {
+  if (req.user) {
     next();
   } else {
     console.log('Usuario sin loguearse');
     res.redirect('/login');
   }
+}
+
+function validarUsuario(req, res, next) {
+  jwt.verify(req.headers['x-access-token'], req.app.get('secretKey'), function (err, decoded) {
+    if (err) {
+      res.json({ status: 'error', message: err.message, data: null });
+    } else {
+      req.body.userId = decoded.id;
+      console.log('jwt verify: ' + decoded);
+      next();
+    }
+  });
 }
 
 module.exports = app;

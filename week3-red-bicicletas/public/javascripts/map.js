@@ -25,4 +25,4 @@ fetch('api/bicicletas')
             L.marker(bici.ubicacion, {title: bici.code}).addTo(map);
         }
     }
-    );
+    ).catch((err) => console.log(err));

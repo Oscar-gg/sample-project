@@ -19,7 +19,7 @@ const tokenSchema = new Schema({
     }
 });
 
-tokenSchema.statics.deleteToken = function(_userid){
+tokenSchema.statics.deleteTokens = function(_userid){
     return this.deleteMany({_userid: _userid}).then((ans) => console.log(ans));
 }
 
